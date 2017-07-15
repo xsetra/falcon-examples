@@ -16,7 +16,13 @@ class RethinkClient:
         self.__host = host
         self.__port = port
         self.__db = db
-        self.connect()
+
+    def db_setup(self):
+        try:
+            rethinkdb.db_create(self.__db).run(self.__db_connection)
+            print('{} database setup completed'.format(self.__db))
+        except RqlRuntimeError:
+            print('{} database exist. Going on.'.format(self.__db))
 
     def connect(self):
         try:
@@ -26,14 +32,10 @@ class RethinkClient:
 
     def table_setup(self, table_name):
         try:
-            rethinkdb.db_create(self.__db).run(self.__db_connection)
-            print('{} database setup completed'.format(self.__db))
+            rethinkdb.db(self.__db).table_create(table_name).run(self.__db_connection)
+            print('{} table creation completed.'.format(table_name))
         except RqlRuntimeError:
-            try:
-                rethinkdb.db(self.__db).table_create(table_name).run(self.__db_connection)
-                print('{} table creation completed.'.format(table_name))
-            except RqlRuntimeError:
-                print('Table already exists. Nothing to do.')
+            print('Table already exists. Nothing to do.')
 
     def get_note(self, note_id):
         """ Fetch a note from database by particular ID.
