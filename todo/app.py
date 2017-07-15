@@ -33,7 +33,7 @@ class NoteResource:
         :return: Status
         """
         try:
-            raw_json = req.stream.read()
+            raw_json = req.stream.read().decode('utf8')
         except Exception as ex:
             raise falcon.HTTPError(falcon.HTTP_400, 'Error', ex.message)
 
