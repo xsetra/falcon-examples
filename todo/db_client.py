@@ -18,6 +18,7 @@ class RethinkClient:
         self.__db = db
 
     def db_setup(self):
+        self.connect()
         try:
             rethinkdb.db_create(self.__db).run(self.__db_connection)
             print('{} database setup completed'.format(self.__db))
@@ -53,3 +54,13 @@ class RethinkClient:
         cursor = rethinkdb.db(self.__db).table('notes').run(self.__db_connection)
         result = {'notes':[n for n in cursor]}
         return result
+
+    def add_note(self, id, title, content):
+        """ Add a new note to notes table.
+        :param id:
+        :param title:
+        :param content:
+        :return: On success id
+        """
+        sid = rethinkdb.db(self.__db).table('notes').insert({'id':id, 'title':title, 'content':content}).run(self.__db_connection)
+        return sid
