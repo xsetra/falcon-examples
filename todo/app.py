@@ -22,9 +22,13 @@ class NoteResource(object):
         :return:
         """
         if 'id' in req.context['body']:
-            req.context['result'] = self.__db_client.get_note(req.context['body']['id'])
+            if req.context['body']['id'] != -1:
+                req.context['result'] = self.__db_client.get_note(req.context['body']['id'])
+            else:
+                req.context['result'] = self.__db_client.get_notes()
         else:
-            req.context['result'] = self.__db_client.get_notes()
+            req.context['result']=falcon.HTTPBadRequest(title='You must send a particular note id or -1')
+
 
     def on_post(self, req, resp):
         """ Handles POST Requests. Add a new todo note.
@@ -75,10 +79,6 @@ class JsonTranslatorMiddleware(object):
         :param resp:
         :return:
         """
-        if req.content_length in (None, 0):
-            # Content is empty.
-            return
-
         body = req.stream.read()
         if not body:
             raise falcon.HTTPBadRequest(title='Empty request body',
