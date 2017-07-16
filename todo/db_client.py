@@ -65,3 +65,11 @@ class RethinkClient:
         """
         sid = rethinkdb.db(self.__db).table('notes').insert({'id':id, 'title':title, 'content':content}).run(self.__db_connection)
         return sid
+
+    def del_note(self, id):
+        """ Delete a note on database by id
+        :param id:
+        :return: On success id
+        """
+        sid = rethinkdb.db(self.__db).table('notes').get(id).delete().run(self.__db_connection)
+        return sid
