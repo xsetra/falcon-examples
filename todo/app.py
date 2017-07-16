@@ -51,7 +51,7 @@ class NoteResource(object):
 class JsonMiddleware(object):
 
     def process_request(self, req, resp):
-        """ Process request before to routing responder method.
+        """ Process request before to routing responder method. Is JSON correct?
         :param req:
         :param resp:
         :return:
@@ -65,13 +65,40 @@ class JsonMiddleware(object):
             raise falcon.HTTPUnsupportedMediaType('This API only supports requests encoded as JSON')
 
 
+class JsonTranslatorMiddleware(object):
+
+    def process_request(self, req, resp):
+        """ Process request. Decode request
+        :param req:
+        :param resp:
+        :return:
+        """
+        if req.content_length in (None, 0):
+            # Content is empty.
+            return
+
+        body = req.stream.read()
+        if not body:
+            raise falcon.HTTPBadRequest(title='Empty request body',
+                                        description='A valid JSON is required')
+        try:
+            req.context['body'] = json.loads(body.decode('utf8'))
+
+        except (ValueError, UnicodeDecodeError):
+            raise falcon.HTTPError(status=falcon.HTTP_753,
+                                   title='Malformed JSON',
+                                   description='Could not decode the request body. The JSON was incorrect or not encoded as UTF-8')
+
+
+
 
 
 db_client = RethinkClient(host='localhost', port=28015, db='todo')
 db_client.db_setup()
 db_client.table_setup(table_name='notes')
 
-api = application = falcon.API(middleware=JsonMiddleware())
+api = application = falcon.API(middleware=[JsonMiddleware(),
+                                           JsonTranslatorMiddleware()])
 api.add_route('/notes', NoteResource(db_client))
 
 if __name__ == '__main__':
