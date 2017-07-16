@@ -43,8 +43,9 @@ class RethinkClient:
         :param note_id: note id
         :return: Fetched note type:<dict>
         """
-        cursor = rethinkdb.db(self.__db).table('notes').filter({'id':note_id})
-        result = {'note': [n for n in cursor.run(self.__db_connection)]}
+        #cursor = rethinkdb.db(self.__db).table('notes').filter(rethinkdb.row['title'] == note_id).run(self.__db_connection)
+        cursor = rethinkdb.db(self.__db).table('notes').get(int(note_id)).run(self.__db_connection)
+        result = {'note': [ n for n in cursor ]}
         return result
 
     def get_notes(self):

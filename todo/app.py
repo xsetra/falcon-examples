@@ -3,7 +3,8 @@
 import falcon
 import json
 
-from .db_client import RethinkClient
+from wsgiref import simple_server
+from db_client import RethinkClient
 
 
 class NoteResource:
@@ -51,3 +52,7 @@ db_client.table_setup(table_name='notes')
 
 api = application = falcon.API()
 api.add_route('/notes', NoteResource(db_client))
+
+if __name__ == '__main__':
+    httpd = simple_server.make_server('127.0.0.1', 8001, api)
+    httpd.serve_forever()
