@@ -32,12 +32,15 @@ class NoteResource(object):
         :param resp:
         :return:
         """
-        req.context['result'] = self.__db_client.add_note(id=req.context['body']['id'],
+        sid = self.__db_client.add_note(id=req.context['body']['id'],
                                                           title=req.context['body']['title'],
                                                           content=req.context['body']['content'])
+        if sid['inserted'] == 1:
+            # Insertion succeded.
+            req.context['result'] = {'result':'Note added successfully.'}
+        else:
+            req.context['result'] = {'result':'Note was not added'}
 
-            sid = self.__db_client.add_note(id=req_json['id'], title=req_json['title'], content=req_json['content'])
-            resp.body = 'Successfully inserted, sid={}'.format(sid)
 
     def on_delete(self, req, resp):
         """ Delete a note from database.
