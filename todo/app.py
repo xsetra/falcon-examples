@@ -21,6 +21,10 @@ class NoteResource(object):
         :param resp:
         :return:
         """
+        if 'id' in req.context['body']:
+            req.context['result'] = self.__db_client.get_note(req.context['body']['id'])
+        else:
+            req.context['result'] = self.__db_client.get_notes()
 
     def on_post(self, req, resp):
         """ Handles POST Requests. Add a new todo note.
@@ -28,17 +32,12 @@ class NoteResource(object):
         :param resp:
         :return:
         """
-        try:
-            raw_json = req.stream.read().decode('utf8')
-        except Exception as ex:
-            raise falcon.HTTPError(falcon.HTTP_400, 'Error', ex.message)
+        req.context['result'] = self.__db_client.add_note(id=req.context['body']['id'],
+                                                          title=req.context['body']['title'],
+                                                          content=req.context['body']['content'])
 
-        try:
-            req_json = json.loads(raw_json)
             sid = self.__db_client.add_note(id=req_json['id'], title=req_json['title'], content=req_json['content'])
             resp.body = 'Successfully inserted, sid={}'.format(sid)
-        except ValueError:
-            raise falcon.HTTPError(falcon.HTTP_400, 'Invalid JSON', 'The JSON was incorrect')
 
     def on_delete(self, req, resp):
         """ Delete a note from database.
@@ -46,7 +45,7 @@ class NoteResource(object):
         :param resp:
         :return: Succcess id.
         """
-
+        pass
 
 class JsonMiddleware(object):
 
