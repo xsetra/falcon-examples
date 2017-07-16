@@ -89,6 +89,17 @@ class JsonTranslatorMiddleware(object):
                                    title='Malformed JSON',
                                    description='Could not decode the request body. The JSON was incorrect or not encoded as UTF-8')
 
+    def process_response(self, req, resp, resource):
+        """ Process response before the response wasn't send to client
+        :param req:
+        :param resp:
+        :param resource:
+        :return:
+        """
+        if 'result' not in req.context:
+            return
+
+        resp.body = json.dumps(req.context['result'])
 
 
 
