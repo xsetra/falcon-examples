@@ -52,7 +52,13 @@ class NoteResource(object):
         :param resp:
         :return: Succcess id.
         """
-        pass
+        id = req.context['body']['id']
+        sid = self.__db_client.del_note(id)
+        if sid['deleted'] == 1:
+            req.context['result'] = {'result':'Note deleted successfully'}
+        else:
+            req.context['result'] = {'result':'Note was not deleted'}
+
 
 class JsonMiddleware(object):
 
