@@ -1,0 +1,2 @@
+rethinkdb=2.3.0
+falcon=1.2.0
