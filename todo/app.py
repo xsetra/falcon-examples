@@ -7,7 +7,7 @@ from wsgiref import simple_server
 from db_client import RethinkClient
 
 
-class NoteResource:
+class NoteResource(object):
 
     def __init__(self, db_client):
         """ Note resource for falcon
@@ -19,19 +19,14 @@ class NoteResource:
         """ Handles GET Requests. Fetch one or all todo notes
         :param req:
         :param resp:
-        :return: Note for particular ID
+        :return:
         """
-        if req.get_param('id'):
-            result = self.__db_client.get_note(req.get_param('id'))
-        else:
-            result = self.__db_client.get_notes()
-        resp.body = json.dumps(result)
 
     def on_post(self, req, resp):
         """ Handles POST Requests. Add a new todo note.
         :param req:
         :param resp:
-        :return: Status
+        :return:
         """
         try:
             raw_json = req.stream.read().decode('utf8')
@@ -45,12 +40,38 @@ class NoteResource:
         except ValueError:
             raise falcon.HTTPError(falcon.HTTP_400, 'Invalid JSON', 'The JSON was incorrect')
 
+    def on_delete(self, req, resp):
+        """ Delete a note from database.
+        :param req:
+        :param resp:
+        :return: Succcess id.
+        """
+
+
+class JsonMiddleware(object):
+
+    def process_request(self, req, resp):
+        """ Process request before to routing responder method.
+        :param req:
+        :param resp:
+        :return:
+        """
+        if not req.client_accepts_json:
+            # If client doesn't support JSON
+            raise falcon.HTTPNotAcceptable('This API only supports encoded as JSON')
+
+        if 'application/json' not in req.content_type:
+            # If content type of header is not application/json
+            raise falcon.HTTPUnsupportedMediaType('This API only supports requests encoded as JSON')
+
+
+
 
 db_client = RethinkClient(host='localhost', port=28015, db='todo')
 db_client.db_setup()
 db_client.table_setup(table_name='notes')
 
-api = application = falcon.API()
+api = application = falcon.API(middleware=JsonMiddleware())
 api.add_route('/notes', NoteResource(db_client))
 
 if __name__ == '__main__':
